@@ -80,6 +80,11 @@ cron.schedule('0 11,15,21 * * *', async () => {
   }
 });
 
+// Root route for health check or friendly message
+app.get('/', (req, res) => {
+  res.send('SattaWala API is running!');
+});
+
 console.log('All routes loaded');
 
 const PORT = process.env.PORT || 5000;
