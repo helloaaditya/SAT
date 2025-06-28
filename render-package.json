@@ -1,0 +1,16 @@
+{
+  "name": "satta-backend",
+  "version": "1.0.0",
+  "description": "Satta Platform Backend for Render deployment",
+  "main": "backend/src/app.js",
+  "scripts": {
+    "start": "cd backend && npm start",
+    "install": "cd backend && npm install",
+    "build": "cd backend && npm install"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+} 
