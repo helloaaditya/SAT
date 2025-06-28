@@ -7,6 +7,7 @@ import instant from '../assets/instant.png';
 import fair from '../assets/fair.png';
 import logo from '../assets/logo.png';
 import WinnersChatBubbles from '../components/Shared/WinnersChatBubbles';
+import { apiCall } from '../utils/api';
 
 // Random names for winners
 const randomNames = [
@@ -80,8 +81,7 @@ const Home = ({ user }) => {
     let timer;
     const fetchNextResultTime = async () => {
       try {
-        const res = await fetch('/api/bet/next-result-time');
-        const data = await res.json();
+        const data = await apiCall('/api/bet/next-result-time');
         if (data.nextResultTime) {
           setNextResultTime(new Date(data.nextResultTime));
         }
