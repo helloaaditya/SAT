@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AddMoneyModal from '../components/Shared/AddMoneyModal';
 import WithdrawModal from '../components/Shared/WithdrawModal';
+import { apiCall } from '../utils/api';
 
 const Betting = ({ user, token }) => {
   const [selectedNumber, setSelectedNumber] = useState(null);
@@ -36,8 +37,7 @@ const Betting = ({ user, token }) => {
     let timer;
     const fetchNextResultTime = async () => {
       try {
-        const res = await fetch('/api/bet/next-result-time');
-        const data = await res.json();
+        const data = await apiCall('/api/bet/next-result-time');
         if (data.nextResultTime) {
           setNextResultTime(new Date(data.nextResultTime));
         }
@@ -91,10 +91,7 @@ const Betting = ({ user, token }) => {
     const fetchPendingBets = async () => {
       setBetsLoading(true);
       try {
-        const res = await fetch('/api/bet/current', {
-          headers: { 'Authorization': `Bearer ${token}` },
-        });
-        const data = await res.json();
+        const data = await apiCall('/api/bet/current');
         setPendingBets(data.bets || []);
       } catch (err) {
         setPendingBets([]);
@@ -102,7 +99,7 @@ const Betting = ({ user, token }) => {
       setBetsLoading(false);
     };
     fetchPendingBets();
-  }, [token, message]);
+  }, [message]);
 
   const handleBet = async (e) => {
     e.preventDefault();
@@ -114,29 +111,20 @@ const Betting = ({ user, token }) => {
     setLoading(true);
     setMessage('');
     try {
-      const res = await fetch('/api/bet', {
+      const data = await apiCall('/api/bet', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
         body: JSON.stringify({ number: selectedNumber, amount: selectedAmount }),
       });
-      const data = await res.json();
-      if (res.ok) {
-        setMessage('🎉 Bet placed successfully! Good luck!');
-        setBalance(data.balance);
-        setSelectedNumber(null);
-        setSelectedAmount(null);
-        // Refresh pending bets
-        setTimeout(() => {
-          window.location.reload();
-        }, 2000);
-      } else {
-        setMessage(data.message || 'Failed to place bet');
-      }
+      setMessage('🎉 Bet placed successfully! Good luck!');
+      setBalance(data.balance);
+      setSelectedNumber(null);
+      setSelectedAmount(null);
+      // Refresh pending bets
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
     } catch (err) {
-      setMessage('Network error. Please try again.');
+      setMessage(err.message || 'Network error. Please try again.');
     }
     setLoading(false);
   };

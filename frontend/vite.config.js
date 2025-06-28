@@ -7,11 +7,20 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: process.env.NODE_ENV === 'production' 
+          ? 'https://sattawala.onrender.com' 
+          : 'http://localhost:5000',
         changeOrigin: true,
-        secure: false,
+        secure: process.env.NODE_ENV === 'production',
         rewrite: (path) => path.replace(/^\/api/, '/api')
       }
     }
+  },
+  define: {
+    'process.env.VITE_API_URL': JSON.stringify(
+      process.env.NODE_ENV === 'production' 
+        ? 'https://sattawala.onrender.com' 
+        : 'http://localhost:5000'
+    )
   }
 })
