@@ -14,11 +14,6 @@ export default defineConfig({
       }
     }
   },
-  build: {
-    rollupOptions: {
-      external: ['@rollup/rollup-linux-x64-gnu']
-    }
-  },
   define: {
     'process.env.VITE_API_URL': JSON.stringify(
       process.env.NODE_ENV === 'production' 
