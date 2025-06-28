@@ -7,13 +7,16 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: process.env.NODE_ENV === 'production' 
-          ? 'https://sattawala.onrender.com' 
-          : 'http://localhost:5000',
+        target: 'http://localhost:5000',
         changeOrigin: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure: false,
         rewrite: (path) => path.replace(/^\/api/, '/api')
       }
+    }
+  },
+  build: {
+    rollupOptions: {
+      external: ['@rollup/rollup-linux-x64-gnu']
     }
   },
   define: {
