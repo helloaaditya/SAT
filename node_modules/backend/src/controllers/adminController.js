@@ -272,7 +272,7 @@ exports.getCurrentRoundBetStats = async (req, res) => {
 // Update platform settings
 exports.updateSettings = async (req, res) => {
   try {
-    const { isActive, minBet, maxBet, payoutMultiplier, maintenanceMode } = req.body;
+    const { isActive, minBet, maxBet, payoutMultiplier, maintenanceMode, upiId } = req.body;
     let settings = await PlatformSettings.findOne();
     if (!settings) {
       settings = new PlatformSettings();
@@ -282,6 +282,7 @@ exports.updateSettings = async (req, res) => {
     if (maxBet !== undefined) settings.maxBet = maxBet;
     if (payoutMultiplier !== undefined) settings.payoutMultiplier = payoutMultiplier;
     if (maintenanceMode !== undefined) settings.maintenanceMode = maintenanceMode;
+    if (upiId !== undefined) settings.upiId = upiId;
     await settings.save();
     res.json({ message: 'Settings updated successfully', settings });
   } catch (error) {

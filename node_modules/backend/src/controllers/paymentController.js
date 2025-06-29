@@ -42,7 +42,7 @@ const createPaymentSession = async (req, res) => {
       amount: amount,
       status: 'pending',
       paymentMethod: 'upi',
-      upiId: 'sattawala@paytm', // Mock UPI ID
+      upiId: 'sattawala@axl', // Mock UPI ID
       orderId: `PAY_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       description: `Add money to ${user.mobile || user.email}`
     };

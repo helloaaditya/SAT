@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import QRCode from 'react-qr-code';
 import { apiCall } from '../../utils/api';
 
-const UPI_ID = '8797223004@ptsbi';
-const UPI_NAME = 'SattaWala'; // Optional display name
+const UPI_NAME = 'SattaWala'; // Always use this as the display name
 
 const AddMoneyModal = ({ isOpen, onClose, onSuccess, currentBalance }) => {
   const [amount, setAmount] = useState('');
@@ -11,6 +10,20 @@ const AddMoneyModal = ({ isOpen, onClose, onSuccess, currentBalance }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [upiId, setUpiId] = useState('sattawala@axl');
+
+  // Fetch UPI ID from backend settings
+  useEffect(() => {
+    apiCall('/api/admin/platform-settings', {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+    })
+      .then(data => {
+        if (data.settings && data.settings.upiId) {
+          setUpiId(data.settings.upiId);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Predefined amounts
   const predefinedAmounts = [50, 100, 200, 500, 1000, 2000, 5000];
@@ -57,7 +70,7 @@ const AddMoneyModal = ({ isOpen, onClose, onSuccess, currentBalance }) => {
   };
 
   // UPI QR code string
-  const upiString = `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(UPI_NAME)}&am=${amount || ''}&cu=INR`;
+  const upiString = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(UPI_NAME)}&am=${amount || ''}&cu=INR`;
 
   if (!isOpen) return null;
 
@@ -132,6 +145,9 @@ const AddMoneyModal = ({ isOpen, onClose, onSuccess, currentBalance }) => {
               </div>
               <div className="mt-2 text-xs text-gray-400 break-all">
                 <span className="font-semibold">UPI String:</span> <span className="select-all">{upiString}</span>
+              </div>
+              <div className="mt-2 text-xs text-gray-400 break-all">
+                <span className="font-semibold">UPI ID:</span> <span className="select-all">{upiId}</span>
               </div>
             </div>
           )}
