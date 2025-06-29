@@ -49,20 +49,20 @@ exports.register = async (req, res) => {
       const referrer = await User.findOne({ referralCode: ref });
       if (referrer) {
         userData.referredBy = referrer._id;
-        referrer.balance += 50;
+        referrer.balance += 25;
         await referrer.save();
-        userData.balance = 50; // New user also gets ₹50
+        userData.balance = 25; // New user also gets ₹25
       }
     }
 
-    // All new users get ₹50 by default
-    userData.balance = 50;
+    // All new users get ₹25 by default
+    userData.balance = 25;
 
     const user = new User(userData);
     await user.save();
-    // Extra safety: ensure new user gets ₹50 if referred
-    if (userData.balance === 50 && user.balance !== 50) {
-      user.balance = 50;
+    // Extra safety: ensure new user gets ₹25 if referred
+    if (userData.balance === 25 && user.balance !== 25) {
+      user.balance = 25;
       await user.save();
     }
 

@@ -49,14 +49,14 @@ const WithdrawModal = ({ isOpen, onClose, currentBalance }) => {
         <h2 className="text-2xl font-bold mb-4 text-center text-blue-700">Withdraw Funds</h2>
         <div className="mb-4 text-sm text-gray-700 bg-yellow-100 p-3 rounded">
           Payouts are processed in <b>1-2 days</b>. You will be notified once approved.<br/>
-          Minimum ₹100. Please double-check your bank details.
+          Minimum ₹200. Please double-check your bank details.
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input name="name" value={form.name} onChange={handleChange} placeholder="Account Holder Name" className="w-full px-4 py-2 border rounded text-black" required />
           <input name="accountNumber" value={form.accountNumber} onChange={handleChange} placeholder="Account Number" className="w-full px-4 py-2 border rounded text-black" required />
           <input name="reAccountNumber" value={form.reAccountNumber} onChange={handleChange} placeholder="Re-enter Account Number" className="w-full px-4 py-2 border rounded text-black" required />
           <input name="ifsc" value={form.ifsc} onChange={handleChange} placeholder="IFSC Code" className="w-full px-4 py-2 border rounded text-black" required />
-          <input name="amount" type="number" min="100" max={currentBalance} value={form.amount} onChange={handleChange} placeholder="Amount (₹)" className="w-full px-4 py-2 border rounded text-black" required />
+          <input name="amount" type="number" min="200" max={currentBalance} value={form.amount} onChange={handleChange} placeholder="Amount (₹)" className="w-full px-4 py-2 border rounded text-black" required />
           <button type="submit" disabled={loading} className="w-full bg-blue-600 text-white py-2 rounded font-bold mt-2">
             {loading ? 'Submitting...' : 'Submit Withdraw Request'}
           </button>

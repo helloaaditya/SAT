@@ -214,7 +214,7 @@ const Home = ({ user }) => {
                   </button>
                 </div>
                 <div className="text-xs sm:text-sm text-gray-200 mt-2 text-center max-w-xs px-4">
-                  Share your referral link! If a new user signs up with your link, <b>both of you</b> get <span className="text-green-400 font-bold">₹50</span> in your wallet instantly.
+                  Share your referral link! If a new user signs up with your link, <b>both of you</b> get <span className="text-green-400 font-bold">₹25</span> in your wallet instantly.
                 </div>
               </div>
             )}

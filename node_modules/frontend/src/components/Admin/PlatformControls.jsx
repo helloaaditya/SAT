@@ -438,6 +438,7 @@ const PlatformControls = () => {
                       <th className="px-3 sm:px-4 py-2 sm:py-3 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">Amount</th>
                       <th className="px-3 sm:px-4 py-2 sm:py-3 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">Status</th>
                       <th className="px-3 sm:px-4 py-2 sm:py-3 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                      <th className="px-3 sm:px-4 py-2 sm:py-3 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">Bank Details</th>
                       <th className="px-3 sm:px-4 py-2 sm:py-3 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
@@ -462,6 +463,11 @@ const PlatformControls = () => {
                         </td>
                         <td className="px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base text-gray-500">
                           {new Date(request.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-gray-900">
+                          <div><b>Name:</b> {request.name}</div>
+                          <div><b>Account:</b> {request.accountNumber}</div>
+                          <div><b>IFSC:</b> {request.ifsc}</div>
                         </td>
                         <td className="px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base">
                           {request.status === 'pending' && (

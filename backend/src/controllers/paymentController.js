@@ -254,7 +254,7 @@ const createWithdrawRequest = async (req, res) => {
     const { name, accountNumber, reAccountNumber, ifsc, amount } = req.body;
     if (!name || !accountNumber || !reAccountNumber || !ifsc || !amount) return res.status(400).json({ message: 'All fields are required' });
     if (accountNumber !== reAccountNumber) return res.status(400).json({ message: 'Account numbers do not match' });
-    if (amount < 100) return res.status(400).json({ message: 'Minimum withdrawal amount is ₹100' });
+    if (amount < 200) return res.status(400).json({ message: 'Minimum withdrawal amount is ₹200' });
     const user = await User.findById(userId);
     if (!user || user.balance < amount) return res.status(400).json({ message: 'Insufficient balance' });
     const reqDoc = await WithdrawRequest.create({ user: userId, name, accountNumber, ifsc, amount });
