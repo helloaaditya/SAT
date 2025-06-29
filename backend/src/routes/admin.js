@@ -4,6 +4,8 @@ const { getCurrentRoundBets, announceResult, getRounds, listUsers, getStats, get
 const auth = require('../middleware/auth');
 const admin = (req, res, next) => req.user.isAdmin ? next() : res.status(403).json({ message: 'Admin only' });
 
+const PlatformSettings = require('../models/PlatformSettings');
+
 router.get('/bets', auth, admin, getCurrentRoundBets);
 router.post('/announce', auth, admin, announceResult);
 router.get('/rounds', auth, admin, getRounds);
@@ -80,6 +82,13 @@ router.get('/result-reminder', auth, admin, async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: 'Failed to get result reminder' });
   }
+});
+
+// GET: Platform settings for admin
+router.get('/platform-settings', auth, admin, async (req, res) => {
+  let settings = await PlatformSettings.findOne();
+  if (!settings) settings = new PlatformSettings();
+  res.json({ settings });
 });
 
 module.exports = router; 
