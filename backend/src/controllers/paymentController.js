@@ -14,133 +14,63 @@ const generateSignature = (data, secretKey) => {
 // Create payment session for PayCash wallet
 const createPaymentSession = async (req, res) => {
   try {
-    console.log('Payment session request received:', req.body);
-    console.log('User from token:', req.user);
-
     const { amount, currency, description, return_url, cancel_url } = req.body;
     const userId = req.user.id;
 
-    // Validate required parameters
-    if (!amount) {
-      console.log('Amount is missing or empty');
-      return res.status(400).json({ message: 'Amount is required' });
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ message: 'Amount is missing or empty' });
     }
 
     if (!userId) {
-      console.log('User ID is missing from token');
-      return res.status(401).json({ message: 'User authentication required' });
+      return res.status(400).json({ message: 'User ID is missing from token' });
     }
 
-    // Validate amount (minimum ₹50)
-    if (amount < 50) {
-      console.log('Amount is below minimum:', amount);
-      return res.status(400).json({ message: 'Minimum amount is ₹50' });
+    // Check minimum amount
+    if (amount < 10) {
+      return res.status(400).json({ message: 'Minimum amount is ₹10' });
     }
 
-    // Validate user exists
+    // Find user
     const user = await User.findById(userId);
     if (!user) {
-      console.log('User not found for ID:', userId);
       return res.status(404).json({ message: 'User not found' });
     }
 
-    console.log('User found:', user.email || user.mobile);
-
-    // Generate unique transaction ID
-    const transactionId = `TXN_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    const orderId = `ORD_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-    // PayCash wallet API configuration
-    const paycashConfig = {
-      merchant_id: process.env.PAYCASH_MERCHANT_ID || 'demo_merchant',
-      api_key: process.env.PAYCASH_API_KEY || 'demo_key',
-      gateway_url: 'https://pay.showcashwallet.com/api/v1/create-order',
-      return_url: return_url || `${process.env.FRONTEND_URL || 'http://localhost:5173'}/bet`,
-      cancel_url: cancel_url || `${process.env.FRONTEND_URL || 'http://localhost:5173'}/bet`
-    };
-
-    console.log('Creating payment record with data:', {
-      user: userId,
-      amount,
-      currency: currency || 'INR',
-      description: description || `Add money to SattaWala wallet - ₹${amount}`
-    });
-
-    // Create payment record in database
-    const payment = new Payment({
-      user: userId,
-      transaction_id: transactionId,
-      order_id: orderId,
-      amount: amount,
-      currency: currency || 'INR',
-      description: description || `Add money to SattaWala wallet - ₹${amount}`,
-      customer_details: {
-        name: user.name || user.mobile,
-        email: user.email || `${user.mobile}@sattawala.com`,
-        mobile: user.mobile
-      },
-      return_url: paycashConfig.return_url,
-      cancel_url: paycashConfig.cancel_url,
-      status: 'pending'
-    });
-
-    await payment.save();
-    console.log('Payment record saved successfully');
-
-    // In production, you would make an actual API call to PayCash wallet
-    // For demo purposes, we'll create a mock payment URL with all required parameters
+    // Create payment record
     const paymentData = {
-      merchant_id: paycashConfig.merchant_id,
-      order_id: orderId,
+      user: userId,
       amount: amount,
-      currency: currency || 'INR',
-      description: description || `Add money to SattaWala wallet - ₹${amount}`,
-      customer_name: user.name || user.mobile,
-      customer_email: user.email || `${user.mobile}@sattawala.com`,
-      customer_mobile: user.mobile,
-      return_url: paycashConfig.return_url,
-      cancel_url: paycashConfig.cancel_url,
-      notify_url: `${process.env.BACKEND_URL || 'http://localhost:5000'}/api/payment/webhook`,
-      timestamp: Date.now()
+      status: 'pending',
+      paymentMethod: 'upi',
+      upiId: 'sattawala@paytm', // Mock UPI ID
+      orderId: `PAY_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      description: `Add money to ${user.mobile || user.email}`
     };
 
-    // Generate signature
-    const signature = generateSignature(paymentData, paycashConfig.api_key);
-    paymentData.signature = signature;
-
-    // Build payment URL
-    const queryParams = Object.keys(paymentData)
-      .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(paymentData[key])}`)
-      .join('&');
-    
-    const mockPaymentUrl = `https://pay.showcashwallet.com/pay?${queryParams}`;
-
-    console.log('Generated payment URL:', mockPaymentUrl);
-    console.log('Payment data:', paymentData);
-
-    // Update payment record with payment URL
-    payment.payment_url = mockPaymentUrl;
+    const payment = new UpiPaymentRequest(paymentData);
     await payment.save();
 
-    console.log('Payment session created successfully:', {
-      transaction_id: transactionId,
-      order_id: orderId,
-      amount: amount,
-      payment_url: mockPaymentUrl
-    });
+    // Mock payment URL (in real implementation, this would be from payment gateway)
+    const mockPaymentUrl = `upi://pay?pa=${paymentData.upiId}&pn=SattaWala&am=${amount}&tn=Add Money&cu=INR&ref=${paymentData.orderId}`;
 
-    res.json({
+    const responseData = {
       success: true,
-      payment_url: mockPaymentUrl,
-      transaction_id: transactionId,
-      order_id: orderId,
+      paymentUrl: mockPaymentUrl,
+      orderId: paymentData.orderId,
       amount: amount,
-      message: 'Payment session created successfully'
-    });
+      upiId: paymentData.upiId,
+      payment: {
+        _id: payment._id,
+        amount: payment.amount,
+        status: payment.status,
+        orderId: payment.orderId,
+        createdAt: payment.createdAt
+      }
+    };
 
+    res.json(responseData);
   } catch (error) {
-    console.error('Payment session creation error:', error);
-    res.status(500).json({ message: 'Failed to create payment session', error: error.message });
+    res.status(500).json({ message: 'Failed to create payment session' });
   }
 };
 
@@ -180,7 +110,6 @@ const handlePaymentWebhook = async (req, res) => {
       if (user) {
         user.balance += parseFloat(amount);
         await user.save();
-        console.log(`Payment successful: ${amount} added to user ${user.mobile}`);
       }
     }
 
@@ -189,74 +118,65 @@ const handlePaymentWebhook = async (req, res) => {
     res.json({ success: true, message: 'Webhook processed successfully' });
 
   } catch (error) {
-    console.error('Payment webhook error:', error);
     res.status(500).json({ message: 'Webhook processing failed' });
   }
 };
 
-// Verify payment status
+// Verify payment
 const verifyPayment = async (req, res) => {
   try {
-    const { transaction_id } = req.params;
+    const { orderId } = req.body;
     const userId = req.user.id;
 
-    const payment = await Payment.findOne({ 
-      transaction_id: transaction_id,
-      user: userId 
+    if (!orderId) {
+      return res.status(400).json({ message: 'Order ID is required' });
+    }
+
+    // Find payment record
+    const payment = await UpiPaymentRequest.findOne({ 
+      orderId: orderId,
+      user: userId,
+      status: 'pending'
     });
 
     if (!payment) {
-      return res.status(404).json({ message: 'Payment not found' });
+      return res.status(404).json({ message: 'Payment not found or already processed' });
     }
 
-    res.json({
-      success: true,
-      payment: {
-        transaction_id: payment.transaction_id,
-        order_id: payment.order_id,
-        status: payment.status,
-        amount: payment.amount,
-        currency: payment.currency,
-        created_at: payment.created_at,
-        processed_at: payment.processed_at
-      }
-    });
+    // Mock verification (in real implementation, verify with payment gateway)
+    // For demo purposes, we'll mark it as successful
+    payment.status = 'completed';
+    payment.verifiedAt = new Date();
+    await payment.save();
 
+    // Add money to user's balance
+    const user = await User.findById(userId);
+    if (user) {
+      user.balance += payment.amount;
+      await user.save();
+    }
+
+    res.json({ 
+      success: true, 
+      message: 'Payment verified successfully',
+      amount: payment.amount,
+      newBalance: user.balance
+    });
   } catch (error) {
-    console.error('Payment verification error:', error);
     res.status(500).json({ message: 'Failed to verify payment' });
   }
 };
 
-// Get payment history for user
+// Get payment history
 const getPaymentHistory = async (req, res) => {
   try {
     const userId = req.user.id;
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
+    const payments = await UpiPaymentRequest.find({ user: userId })
+      .sort({ createdAt: -1 })
+      .limit(50);
 
-    const payments = await Payment.find({ user: userId })
-      .sort({ created_at: -1 })
-      .skip(skip)
-      .limit(limit)
-      .select('-webhook_data');
-
-    const total = await Payment.countDocuments({ user: userId });
-
-    res.json({
-      success: true,
-      payments: payments,
-      pagination: {
-        page,
-        limit,
-        total,
-        pages: Math.ceil(total / limit)
-      }
-    });
-
+    res.json({ payments });
   } catch (error) {
-    console.error('Payment history error:', error);
     res.status(500).json({ message: 'Failed to fetch payment history' });
   }
 };
@@ -367,7 +287,6 @@ const getWithdrawRequests = async (req, res) => {
     
     res.json({ requests });
   } catch (error) {
-    console.error('Error getting withdraw requests:', error);
     res.status(500).json({ message: 'Failed to get withdraw requests' });
   }
 };
@@ -381,7 +300,6 @@ const listWithdrawRequests = async (req, res) => {
     
     res.json({ requests });
   } catch (error) {
-    console.error('Error listing withdraw requests:', error);
     res.status(500).json({ message: 'Failed to list withdraw requests' });
   }
 };

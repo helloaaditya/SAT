@@ -58,7 +58,13 @@ router.get('/next-result-time', async (req, res) => {
       nextTime.setDate(today.getDate() + 1);
       nextTime.setHours(resultHours[0], 0, 0, 0);
     }
-    res.json({ nextResultTime: nextTime.toISOString() });
+    
+    // Return both server time and next result time to ensure synchronization
+    res.json({ 
+      nextResultTime: nextTime.toISOString(),
+      serverTime: now.toISOString(),
+      timezone: 'Asia/Kolkata' // Indian Standard Time
+    });
   } catch (err) {
     res.status(500).json({ message: 'Failed to get next result time' });
   }

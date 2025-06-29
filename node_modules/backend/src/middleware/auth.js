@@ -1,26 +1,21 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
 
-module.exports = async (req, res, next) => {
-  console.log('=== AUTH MIDDLEWARE ===');
-  console.log('Headers:', req.headers);
+const auth = (req, res, next) => {
+  const authHeader = req.header('Authorization');
   
-  const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    console.log('No valid authorization header found');
-    return res.status(401).json({ message: 'No token provided' });
+    return res.status(401).json({ message: 'No valid authorization header found' });
   }
   
-  const token = authHeader.split(' ')[1];
-  console.log('Token extracted:', token ? token.substring(0, 20) + '...' : 'null');
+  const token = authHeader.substring(7);
   
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log('Token decoded successfully:', decoded);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
     req.user = decoded;
     next();
   } catch (err) {
-    console.log('Token verification failed:', err.message);
-    res.status(401).json({ message: 'Invalid token' });
+    return res.status(401).json({ message: 'Token verification failed' });
   }
-}; 
+};
+
+module.exports = auth; 

@@ -24,23 +24,6 @@ router.get('/test', (req, res) => {
   res.json({ message: 'Payment routes are working!' });
 });
 
-// Debug endpoint to see raw request data
-router.post('/debug', (req, res) => {
-  console.log('=== DEBUG PAYMENT REQUEST ===');
-  console.log('Headers:', req.headers);
-  console.log('Body:', req.body);
-  console.log('Query:', req.query);
-  console.log('User:', req.user);
-  console.log('=============================');
-  
-  res.json({
-    message: 'Debug data logged',
-    headers: req.headers,
-    body: req.body,
-    user: req.user
-  });
-});
-
 // Create payment session (requires authentication)
 router.post('/create-session', auth, paymentController.createPaymentSession);
 

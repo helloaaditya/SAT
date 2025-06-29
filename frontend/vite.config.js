@@ -10,7 +10,18 @@ export default defineConfig({
         target: 'http://localhost:5000',
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/api/, '/api')
+        rewrite: (path) => path.replace(/^\/api/, '/api'),
+        configure: (proxy, options) => {
+          proxy.on('error', (err, req, res) => {
+            // Handle proxy errors silently
+          });
+          proxy.on('proxyReq', (proxyReq, req, res) => {
+            // Proxy request handling
+          });
+          proxy.on('proxyRes', (proxyRes, req, res) => {
+            // Proxy response handling
+          });
+        },
       }
     }
   },

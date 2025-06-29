@@ -17,6 +17,7 @@ const Betting = ({ user, token }) => {
   const [showWithdrawalRequests, setShowWithdrawalRequests] = useState(false);
   const [nextResultTime, setNextResultTime] = useState(null);
   const [countdown, setCountdown] = useState('');
+  const [serverTimeOffset, setServerTimeOffset] = useState(0);
 
   // Available numbers (1-20)
   const numbers = Array.from({ length: 20 }, (_, i) => i + 1);
@@ -42,6 +43,14 @@ const Betting = ({ user, token }) => {
         const data = await apiCall('/api/bet/next-result-time');
         if (data.nextResultTime) {
           setNextResultTime(new Date(data.nextResultTime));
+          
+          // Calculate time offset between client and server
+          if (data.serverTime) {
+            const serverTime = new Date(data.serverTime);
+            const clientTime = new Date();
+            const offset = serverTime.getTime() - clientTime.getTime();
+            setServerTimeOffset(offset);
+          }
         }
       } catch {}
     };
@@ -56,7 +65,8 @@ const Betting = ({ user, token }) => {
   useEffect(() => {
     if (!nextResultTime) return;
     const updateCountdown = () => {
-      const now = new Date();
+      // Use server-synchronized time
+      const now = new Date(Date.now() + serverTimeOffset);
       const diff = nextResultTime - now;
       if (diff <= 0) {
         setCountdown('Result time!');
@@ -69,7 +79,7 @@ const Betting = ({ user, token }) => {
     updateCountdown();
     const id = setInterval(updateCountdown, 1000);
     return () => clearInterval(id);
-  }, [nextResultTime]);
+  }, [nextResultTime, serverTimeOffset]);
 
   function formatTime(dt) {
     if (!dt) return '';
