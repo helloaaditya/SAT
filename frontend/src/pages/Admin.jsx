@@ -4,6 +4,7 @@ import Bets from '../components/Admin/Bets';
 import Rounds from '../components/Admin/Rounds';
 import UPIRequests from '../components/Admin/UPIRequests';
 import PlatformControls from '../components/Admin/PlatformControls';
+import { apiCall } from '../utils/api';
 
 const sections = [
   { key: 'dashboard', label: 'Dashboard' },
@@ -25,13 +26,10 @@ const Admin = () => {
   useEffect(() => {
     const fetchResultReminder = async () => {
       try {
-        const res = await fetch('/api/admin/result-reminder', {
+        const data = await apiCall('/api/admin/result-reminder', {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
-        if (res.ok) {
-          const data = await res.json();
-          setResultReminder(data);
-        }
+        setResultReminder(data);
       } catch (err) {
         console.error('Failed to fetch result reminder:', err);
       }
@@ -45,10 +43,9 @@ const Admin = () => {
   useEffect(() => {
     if (active === 'dashboard') {
       setLoading(true);
-      fetch('/api/admin/rounds', {
+      apiCall('/api/admin/rounds', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       })
-        .then(res => res.json())
         .then(data => {
           setRounds(data.rounds || []);
           setLoading(false);

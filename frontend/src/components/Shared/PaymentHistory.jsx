@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiCall } from '../../utils/api';
 
 const PaymentHistory = ({ isOpen, onClose, token }) => {
   const [payments, setPayments] = useState([]);
@@ -18,22 +19,15 @@ const PaymentHistory = ({ isOpen, onClose, token }) => {
     setError('');
     
     try {
-      const response = await fetch(`/api/payment/history?page=${page}&limit=10`, {
+      const data = await apiCall(`/api/payment/history?page=${page}&limit=10`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setPayments(data.payments);
-        setTotalPages(data.pagination.pages);
-      } else {
-        setError(data.message || 'Failed to fetch payment history');
-      }
+      setPayments(data.payments);
+      setTotalPages(data.pagination.pages);
     } catch (err) {
-      setError('Network error. Please try again.');
+      setError(err.message || 'Failed to fetch payment history');
     } finally {
       setLoading(false);
     }

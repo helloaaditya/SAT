@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { apiCall } from '../utils/api';
 
 const Register = ({ onLogin }) => {
   const [formData, setFormData] = useState({
@@ -64,31 +65,20 @@ const Register = ({ onLogin }) => {
         ref: ref
       };
 
-      const response = await fetch('/api/auth/register', {
+      const data = await apiCall('/api/auth/register', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify(requestData),
       });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        // Fetch latest user object (with referralCode)
-        const userRes = await fetch('/api/auth/user', {
-          headers: { Authorization: `Bearer ${data.token}` }
-        });
-        const userData = await userRes.json();
-        if (userData.user) {
-          onLogin(data.token, userData.user);
-        } else {
-          onLogin(data.token, data.user);
-        }
-        setSuccess('Registration successful!');
+      // Fetch latest user object (with referralCode)
+      const userData = await apiCall('/api/auth/user', {
+        headers: { Authorization: `Bearer ${data.token}` }
+      });
+      if (userData.user) {
+        onLogin(data.token, userData.user);
       } else {
-        setError(data.message || 'Registration failed');
+        onLogin(data.token, data.user);
       }
+      setSuccess('Registration successful!');
     } catch (err) {
       setError('Network error. Please try again.');
     } finally {

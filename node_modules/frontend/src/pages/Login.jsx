@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { apiCall } from '../utils/api';
 
 const Login = ({ onLogin }) => {
   const [formData, setFormData] = useState({
@@ -22,32 +23,21 @@ const Login = ({ onLogin }) => {
     setError('');
 
     try {
-      const response = await fetch('/api/auth/login', {
+      const data = await apiCall('/api/auth/login', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify(formData),
       });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        // Fetch latest user object (with referralCode)
-        const userRes = await fetch('/api/auth/user', {
-          headers: { Authorization: `Bearer ${data.token}` }
-        });
-        const userData = await userRes.json();
-        if (userData.user) {
-          onLogin(data.token, userData.user);
-        } else {
-          onLogin(data.token, data.user);
-        }
+      // Fetch latest user object (with referralCode)
+      const userData = await apiCall('/api/auth/user', {
+        headers: { Authorization: `Bearer ${data.token}` }
+      });
+      if (userData.user) {
+        onLogin(data.token, userData.user);
       } else {
-        setError(data.message || 'Login failed');
+        onLogin(data.token, data.user);
       }
     } catch (err) {
-      setError('Network error. Please try again.');
+      setError(err.message || 'Login failed');
     } finally {
       setLoading(false);
     }

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { apiCall } from '../../utils/api';
 
 const Rounds = () => {
   const [rounds, setRounds] = useState([]);
@@ -10,10 +11,9 @@ const Rounds = () => {
 
   useEffect(() => {
     setLoading(true);
-    fetch('/api/admin/rounds', {
+    apiCall('/api/admin/rounds', {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
     })
-      .then(res => res.json())
       .then(data => {
         setRounds(data.rounds || []);
         setLoading(false);
@@ -23,10 +23,9 @@ const Rounds = () => {
         setLoading(false);
       });
     // Fetch open round
-    fetch('/api/admin/bets', {
+    apiCall('/api/admin/bets', {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
     })
-      .then(res => res.json())
       .then(data => {
         if (data.bets && data.bets.length > 0) {
           setOpenRound(data.bets[0].round || null);
@@ -37,15 +36,10 @@ const Rounds = () => {
   const handleAnnounce = (e) => {
     e.preventDefault();
     setAnnounceMsg('');
-    fetch('/api/admin/announce', {
+    apiCall('/api/admin/announce', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
       body: JSON.stringify({ winningNumber }),
     })
-      .then(res => res.json())
       .then(data => {
         setAnnounceMsg(data.message || 'Result announced');
       })

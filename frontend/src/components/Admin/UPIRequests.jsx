@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { apiCall } from '../../utils/api';
 
 const UPIRequests = () => {
   const [requests, setRequests] = useState([]);
@@ -9,10 +10,9 @@ const UPIRequests = () => {
 
   const fetchRequests = () => {
     setLoading(true);
-    fetch('/api/payment/upi-requests', {
+    apiCall('/api/payment/upi-requests', {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
     })
-      .then(res => res.json())
       .then(data => {
         setRequests(data.requests || []);
         setLoading(false);
@@ -29,15 +29,10 @@ const UPIRequests = () => {
 
   const handleAction = (id, action) => {
     setActionMsg('');
-    fetch(`/api/payment/upi-requests/${id}/${action}`, {
+    apiCall(`/api/payment/upi-requests/${id}/${action}`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
       body: JSON.stringify({ adminNote: note[id] || '' }),
     })
-      .then(res => res.json())
       .then(data => {
         setActionMsg(data.message || `${action}d`);
         fetchRequests();

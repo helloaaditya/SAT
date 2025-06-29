@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { apiCall } from '../../utils/api';
 
 const PlatformControls = () => {
   const [stats, setStats] = useState(null);
@@ -11,10 +12,9 @@ const PlatformControls = () => {
 
   const fetchStats = () => {
     setLoading(true);
-    fetch('/api/admin/stats', {
+    apiCall('/api/admin/stats', {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
     })
-      .then(res => res.json())
       .then(data => {
         setStats(data);
         setLoading(false);
@@ -26,10 +26,9 @@ const PlatformControls = () => {
   };
 
   const fetchWithdrawals = () => {
-    fetch('/api/payment/withdraw-requests', {
+    apiCall('/api/payment/withdraw-requests', {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
     })
-      .then(res => res.json())
       .then(data => setWithdrawals(data.requests || []));
   };
 
@@ -40,11 +39,9 @@ const PlatformControls = () => {
 
   const handleClean = () => {
     setCleanMsg('');
-    fetch('/api/bet/clean-invalid', {
+    apiCall('/api/bet/clean-invalid', {
       method: 'DELETE',
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
     })
-      .then(res => res.json())
       .then(data => {
         setCleanMsg(data.message || 'Cleaned');
         fetchStats();
@@ -54,15 +51,10 @@ const PlatformControls = () => {
 
   const handleAction = (id, action) => {
     setActionMsg('');
-    fetch(`/api/payment/withdraw-requests/${id}/${action}`, {
+    apiCall(`/api/payment/withdraw-requests/${id}/${action}`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
       body: JSON.stringify({ adminNote: note[id] || '' }),
     })
-      .then(res => res.json())
       .then(data => {
         setActionMsg(data.message || `${action}d`);
         fetchWithdrawals();

@@ -12,6 +12,7 @@ import Terms from './pages/Terms'
 import Privacy from './pages/Privacy'
 import Contact from './pages/Contact'
 import Loader from './components/Shared/Loader'
+import { apiCall } from './utils/api'
 import './App.css'
 
 function App() {
@@ -25,10 +26,9 @@ function App() {
   useEffect(() => {
     if (!token) return;
     const interval = setInterval(() => {
-      fetch('/api/auth/user', {
+      apiCall('/api/auth/user', {
         headers: { Authorization: `Bearer ${token}` }
       })
-        .then(res => res.json())
         .then(data => {
           if (data.user && data.user.balance !== user?.balance) {
             setUser(u => ({ ...u, balance: data.user.balance }));

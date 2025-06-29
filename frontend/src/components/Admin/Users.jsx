@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { apiCall } from '../../utils/api';
 
 const Users = () => {
   const [users, setUsers] = useState([]);
@@ -7,10 +8,9 @@ const Users = () => {
 
   useEffect(() => {
     setLoading(true);
-    fetch('/api/admin/users', {
+    apiCall('/api/admin/users', {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
     })
-      .then(res => res.json())
       .then(data => {
         setUsers(data.users || []);
         setLoading(false);

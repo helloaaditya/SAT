@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiCall } from '../../utils/api';
 
 const WithdrawModal = ({ isOpen, onClose, currentBalance }) => {
   const [form, setForm] = useState({ name: '', accountNumber: '', reAccountNumber: '', ifsc: '', amount: '' });
@@ -8,10 +9,9 @@ const WithdrawModal = ({ isOpen, onClose, currentBalance }) => {
 
   useEffect(() => {
     if (!isOpen) return;
-    fetch('/api/payment/withdraw-requests', {
+    apiCall('/api/payment/withdraw-requests', {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
     })
-      .then(res => res.json())
       .then(data => setRequests((data.requests || []).filter(r => r.user?._id === JSON.parse(localStorage.getItem('user'))._id)));
   }, [isOpen]);
 
@@ -21,12 +21,10 @@ const WithdrawModal = ({ isOpen, onClose, currentBalance }) => {
     e.preventDefault();
     setLoading(true);
     setMessage('');
-    fetch('/api/payment/withdraw-request', {
+    apiCall('/api/payment/withdraw-request', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
       body: JSON.stringify(form),
     })
-      .then(res => res.json())
       .then(data => {
         if (data.success) {
           setMessage('Withdraw request submitted!');

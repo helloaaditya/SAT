@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { apiCall } from '../../utils/api';
 
 const Bets = () => {
   const [bets, setBets] = useState([]);
@@ -8,10 +9,9 @@ const Bets = () => {
 
   useEffect(() => {
     setLoading(true);
-    fetch('/api/bet/all', {
+    apiCall('/api/bet/all', {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
     })
-      .then(res => res.json())
       .then(data => {
         setBets(data.bets || []);
         setLoading(false);
@@ -21,10 +21,9 @@ const Bets = () => {
         setLoading(false);
       });
     // Fetch current round bet stats
-    fetch('/api/admin/current-round-bet-stats', {
+    apiCall('/api/admin/current-round-bet-stats', {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
     })
-      .then(res => res.json())
       .then(data => setStats(data));
   }, []);
 

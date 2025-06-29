@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import QRCode from 'react-qr-code';
+import { apiCall } from '../../utils/api';
 
 const UPI_ID = '8797223004@ptsbi';
 const UPI_NAME = 'SattaWala'; // Optional display name
@@ -40,25 +41,16 @@ const AddMoneyModal = ({ isOpen, onClose, onSuccess, currentBalance }) => {
     setError('');
     setSuccess('');
     try {
-      const response = await fetch('/api/payment/upi-request', {
+      const data = await apiCall('/api/payment/upi-request', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
         body: JSON.stringify({ amount: parseFloat(amount), utr })
       });
-      const data = await response.json();
-      if (response.ok) {
-        setSuccess('Your payment request has been submitted! Pending admin approval.');
-        setUtr('');
-        setAmount('');
-        if (onSuccess) onSuccess();
-      } else {
-        setError(data.message || 'Failed to submit payment request');
-      }
+      setSuccess('Your payment request has been submitted! Pending admin approval.');
+      setUtr('');
+      setAmount('');
+      if (onSuccess) onSuccess();
     } catch (err) {
-      setError('Network error. Please try again.');
+      setError(err.message || 'Failed to submit payment request');
     } finally {
       setLoading(false);
     }

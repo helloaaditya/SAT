@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Loader from '../components/Shared/Loader';
+import { apiCall } from '../utils/api';
 
 const Results = ({ user, token }) => {
   const [results, setResults] = useState([]);
@@ -11,8 +12,7 @@ const Results = ({ user, token }) => {
   // Fetch all results
   useEffect(() => {
     setLoading(true);
-    fetch('/api/bet/results')
-      .then(res => res.json())
+    apiCall('/api/bet/results')
       .then(data => {
         setResults(data.results || []);
         setLoading(false);
@@ -26,10 +26,9 @@ const Results = ({ user, token }) => {
   // Fetch user's own results
   useEffect(() => {
     if (!token) return;
-    fetch('/api/bet/history', {
+    apiCall('/api/bet/history', {
       headers: { 'Authorization': `Bearer ${token}` }
     })
-      .then(res => res.json())
       .then(data => setUserResults(data.bets || []));
   }, [token]);
 
