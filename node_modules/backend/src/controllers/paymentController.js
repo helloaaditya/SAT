@@ -346,19 +346,47 @@ const createWithdrawRequest = async (req, res) => {
   }
 };
 
-// Admin: list all withdraw requests
-const listWithdrawRequests = async (req, res) => {
+// Get withdraw requests (user's own or all if admin)
+const getWithdrawRequests = async (req, res) => {
   try {
-    const { status } = req.query;
-    const filter = status ? { status } : {};
-    const requests = await WithdrawRequest.find(filter).populate('user', 'email mobile name').sort({ createdAt: -1 });
-    res.json({ success: true, requests });
-  } catch (err) {
-    res.status(500).json({ message: 'Failed to fetch withdraw requests' });
+    const userId = req.user.id;
+    const isAdmin = req.user.isAdmin;
+    
+    let requests;
+    if (isAdmin) {
+      // Admin can see all requests
+      requests = await WithdrawRequest.find()
+        .populate('user', 'name email mobile')
+        .sort({ createdAt: -1 });
+    } else {
+      // User can only see their own requests
+      requests = await WithdrawRequest.find({ user: userId })
+        .populate('user', 'name email mobile')
+        .sort({ createdAt: -1 });
+    }
+    
+    res.json({ requests });
+  } catch (error) {
+    console.error('Error getting withdraw requests:', error);
+    res.status(500).json({ message: 'Failed to get withdraw requests' });
   }
 };
 
-// Admin: approve a withdraw request
+// List all withdraw requests (admin only - for admin panel)
+const listWithdrawRequests = async (req, res) => {
+  try {
+    const requests = await WithdrawRequest.find()
+      .populate('user', 'name email mobile')
+      .sort({ createdAt: -1 });
+    
+    res.json({ requests });
+  } catch (error) {
+    console.error('Error listing withdraw requests:', error);
+    res.status(500).json({ message: 'Failed to list withdraw requests' });
+  }
+};
+
+// Approve withdraw request (admin only)
 const approveWithdrawRequest = async (req, res) => {
   try {
     const { id } = req.params;
@@ -407,6 +435,7 @@ module.exports = {
   approveUpiPaymentRequest,
   rejectUpiPaymentRequest,
   createWithdrawRequest,
+  getWithdrawRequests,
   listWithdrawRequests,
   approveWithdrawRequest,
   rejectWithdrawRequest

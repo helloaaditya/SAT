@@ -12,7 +12,7 @@ const WithdrawModal = ({ isOpen, onClose, currentBalance }) => {
     apiCall('/api/payment/withdraw-requests', {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
     })
-      .then(data => setRequests((data.requests || []).filter(r => r.user?._id === JSON.parse(localStorage.getItem('user'))._id)));
+      .then(data => setRequests(data.requests || []));
   }, [isOpen]);
 
   const handleChange = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
@@ -48,7 +48,7 @@ const WithdrawModal = ({ isOpen, onClose, currentBalance }) => {
         <button onClick={onClose} className="absolute top-2 right-2 text-gray-500 hover:text-red-500 text-2xl">×</button>
         <h2 className="text-2xl font-bold mb-4 text-center text-blue-700">Withdraw Funds</h2>
         <div className="mb-4 text-sm text-gray-700 bg-yellow-100 p-3 rounded">
-          Payouts are processed in <b>5-7 days</b>. You will be notified once approved.<br/>
+          Payouts are processed in <b>1-2 days</b>. You will be notified once approved.<br/>
           Minimum ₹100. Please double-check your bank details.
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">

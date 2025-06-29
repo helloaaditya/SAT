@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AddMoneyModal from '../components/Shared/AddMoneyModal';
 import WithdrawModal from '../components/Shared/WithdrawModal';
+import WithdrawalRequests from '../components/Shared/WithdrawalRequests';
 import { apiCall } from '../utils/api';
 
 const Betting = ({ user, token }) => {
@@ -13,6 +14,7 @@ const Betting = ({ user, token }) => {
   const [betsLoading, setBetsLoading] = useState(true);
   const [showAddMoneyModal, setShowAddMoneyModal] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+  const [showWithdrawalRequests, setShowWithdrawalRequests] = useState(false);
   const [nextResultTime, setNextResultTime] = useState(null);
   const [countdown, setCountdown] = useState('');
 
@@ -175,6 +177,12 @@ const Betting = ({ user, token }) => {
               className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-2 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-blue-500/25"
             >
               🏦 Withdraw
+            </button>
+            <button
+              onClick={() => setShowWithdrawalRequests(true)}
+              className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white px-6 py-2 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-purple-500/25"
+            >
+              📋 Requests
             </button>
           </div>
         </div>
@@ -360,6 +368,12 @@ const Betting = ({ user, token }) => {
         isOpen={showWithdrawModal}
         onClose={() => setShowWithdrawModal(false)}
         currentBalance={balance}
+      />
+
+      <WithdrawalRequests
+        isOpen={showWithdrawalRequests}
+        onClose={() => setShowWithdrawalRequests(false)}
+        token={token}
       />
     </div>
   );

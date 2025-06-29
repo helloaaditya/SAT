@@ -55,8 +55,14 @@ router.get('/history', auth, paymentController.getPaymentHistory);
 
 // Withdraw request (user)
 router.post('/withdraw-request', auth, paymentController.createWithdrawRequest);
-// Admin: list all withdraw requests
-router.get('/withdraw-requests', auth, isAdmin, paymentController.listWithdrawRequests);
+
+// User: get their own withdrawal requests OR Admin: get all requests
+router.get('/withdraw-requests', auth, paymentController.getWithdrawRequests);
+
+// Admin: list all withdraw requests (for admin panel)
+router.get('/admin/withdraw-requests', auth, isAdmin, paymentController.listWithdrawRequests);
+
+// Admin: approve/reject withdraw requests
 router.post('/withdraw-requests/:id/approve', auth, isAdmin, paymentController.approveWithdrawRequest);
 router.post('/withdraw-requests/:id/reject', auth, isAdmin, paymentController.rejectWithdrawRequest);
 
